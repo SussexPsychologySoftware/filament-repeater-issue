@@ -38,7 +38,6 @@ class ProductResource extends Resource
                                 'index' => "Index array",
                                 'named' => "Nested and named"
                             ])
-                            ->default('index')
                             ->afterStateUpdated(function(?string $state, Get $get, Set $set): void {
                                 if ($state === 'index') {
                                     $array = ['abc', 'def', 'ghi'];
