@@ -29,14 +29,11 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make('Unnamed Repeater')
+                Grid::make('')
                     ->columns(3)
                     ->schema([
-                        // Unnamed repeater indexed array
                         ToggleButtons::make('Index type')
                             ->live()
-                            // [['my_input'=>'abc'], ['my_input'=>'def'], ['my_input'=>'ghi']]
-                                //['abc', 'def', 'ghi']
                             ->options([
                                 'index' => "Index array",
                                 'named' => "Nested and named"
@@ -48,7 +45,7 @@ class ProductResource extends Resource
                                     $set('named', $array);
                                     $set('unnamed', $array);
                                     $set('input_data', json_encode($array));
-                                } else {
+                                } else if ($state === 'named')  {
                                     $set('named', [['input'=>'abc'], ['input'=>'def'], ['input'=>'ghi']]);
                                     $set('unnamed', [[''=>'abc'], [''=>'def'], [''=>'ghi']]);
                                     $set('input_data', json_encode([[''=>'abc'], [''=>'def'], [''=>'ghi']]).' AND '.json_encode([['input'=>'abc'], ['input'=>'def'], ['input'=>'ghi']]));
@@ -59,17 +56,17 @@ class ProductResource extends Resource
 
                             }),
 
-                        Repeater::make('unnamed')
-                            ->label('Unnamed Repeater')
-                            ->simple(
-                                TextInput::make('')
-                                    ->disabled()
-                            ),
-
                         Repeater::make('named')
                             ->label('Named Repeater')
                             ->simple(
                                 TextInput::make('input')
+                                    ->disabled()
+                            ),
+
+                        Repeater::make('unnamed')
+                            ->label('Unnamed Repeater')
+                            ->simple(
+                                TextInput::make('')
                                     ->disabled()
                             )
 
@@ -82,17 +79,16 @@ class ProductResource extends Resource
                             ->label('Input data')
                             ->disabled(),
 
+                        TextInput::make('named_data')
+                            ->label('$get Named Data')
+                            ->disabled(),
+
                         TextInput::make('unnamed_data')
                             ->label('$get Unnamed Data')
                             ->disabled(),
 
-                        TextInput::make('named_data')
-                            ->label('$get Named Data')
-                            ->disabled(),
-                    ]),
-
-            ])
-            ->statePath('data');
+                    ])
+            ]);
     }
 
     public static function table(Table $table): Table
