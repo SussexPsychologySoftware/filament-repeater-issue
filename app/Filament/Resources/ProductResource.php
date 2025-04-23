@@ -3,11 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
-use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
 use Filament\Forms;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
@@ -16,8 +17,8 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProductResource extends Resource
 {
@@ -61,7 +62,23 @@ class ProductResource extends Resource
                                 TextInput::make('input')
                                     ->live()
                                     //->disabled()
-                            ),
+                                    ->afterStateHydrated(function (Component $component, ?string $state) {
+                                        // Logs only on 'add new' as null
+                                        Log::info('Named input hydrated, state:', [$state]);
+                                    })
+                                    ->afterStateUpdated(function (Component $component, ?string $state) {
+                                        // Logs only on 'add new', but with data of previously updated component?
+                                        Log::info('Named input updated, state:', [$state]);
+                                    })
+                            )
+                            ->afterStateUpdated(function (Component $component, ?array $state, Get $get, Set $set) {
+                                $set('named_data', json_encode($state));
+                                Log::info('Named repeater updated, state:', [$state]);
+                            }),
+//                            ->afterStateHydrated(function (Component $component, array|string|null $state) {
+//                                // Never fires - attaching this stops data saving?
+//                                Log::info('Named repeater hydrated, state:', [$state]);
+//                            }),
 
                         Repeater::make('unnamed_repeater')
                             ->label('Unnamed Repeater')
@@ -69,7 +86,24 @@ class ProductResource extends Resource
                                 TextInput::make('')
                                     ->live()
                                     //->disabled()
+                                    ->afterStateHydrated(function (Component $component, array|string|null $state) { //NOTE array|string $state...
+                                        // Logs only on 'add new' as [[]]
+                                        Log::info('Unnamed input hydrated, state:', [$state]);
+                                    })
+                                    ->afterStateUpdated(function (Component $component, ?string $state) {
+                                        // Logs only on 'add new', but with data of previously updated component?
+                                        Log::info('Unnamed input updated, state:', [$state]);
+                                    })
                             )
+                            ->afterStateUpdated(function (Component $component, ?array $state, Get $get, Set $set) {
+                                $set('unnamed_data', json_encode($state));
+                                Log::info('Unnamed repeater updated, state:', [$state]);
+                            })
+//                            ->afterStateHydrated(function (Component $component, array|string $state) {})
+                            ->afterStateHydrated(function (Component $component, array|string $state) {
+                                // Never fires
+                                Log::info('Unnamed repeater hydrated, state:', [$state]);
+                            })
 
                         ]),
 
