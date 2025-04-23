@@ -41,28 +41,28 @@ class ProductResource extends Resource
                             ->afterStateUpdated(function(?string $state, Get $get, Set $set): void {
                                 if ($state === 'index') {
                                     $array = ['abc', 'def', 'ghi'];
-                                    $set('named', $array);
-                                    $set('unnamed', $array);
+                                    $set('named_repeater', $array);
+                                    $set('unnamed_repeater', $array);
                                     $set('input_data', json_encode($array));
                                 } else if ($state === 'named')  {
-                                    $set('named', [['input'=>'abc'], ['input'=>'def'], ['input'=>'ghi']]);
-                                    $set('unnamed', [[''=>'abc'], [''=>'def'], [''=>'ghi']]);
+                                    $set('named_repeater', [['input'=>'abc'], ['input'=>'def'], ['input'=>'ghi']]);
+                                    $set('unnamed_repeater', [[''=>'abc'], [''=>'def'], [''=>'ghi']]);
                                     $set('input_data', json_encode([[''=>'abc'], [''=>'def'], [''=>'ghi']]).' AND '.json_encode([['input'=>'abc'], ['input'=>'def'], ['input'=>'ghi']]));
                                 }
 
-                                $set('named_data', json_encode($get('named')));
-                                $set('unnamed_data', json_encode($get('unnamed')));
+                                $set('named_data', json_encode($get('named_repeater')));
+                                $set('unnamed_data', json_encode($get('unnamed_repeater')));
 
                             }),
 
-                        Repeater::make('named')
+                        Repeater::make('named_repeater')
                             ->label('Named Repeater')
                             ->simple(
                                 TextInput::make('input')
                                     ->disabled()
                             ),
 
-                        Repeater::make('unnamed')
+                        Repeater::make('unnamed_repeater')
                             ->label('Unnamed Repeater')
                             ->simple(
                                 TextInput::make('')
