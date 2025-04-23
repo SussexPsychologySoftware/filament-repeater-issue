@@ -5,7 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Forms;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Component;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -14,7 +17,9 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +35,7 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make('')
+                Grid::make('simple_repeaters')
                     ->columns(3)
                     ->schema([
                         ToggleButtons::make('Index type')
@@ -122,7 +127,52 @@ class ProductResource extends Resource
                             ->label('Unnamed Data state')
                             ->disabled(),
 
-                    ])
+                    ]),
+
+                Actions::make([
+                    Action::make('exportJson')
+                        ->label('Export')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function (?Product $record) {
+                            //https://v2.filamentphp.com/tricks/add-action-to-table-to-export-record-as-json-file
+                            $filename = date('Y-m-d').'.json';
+                            // Return a download response
+                            return response()->streamDownload(function () use ($record) {
+                                echo json_encode($record, JSON_PRETTY_PRINT);
+                            }, $filename, [
+                                'Content-Type' => 'application/json',
+                            ]);
+                        }),
+
+                    Action::make('importJson')
+                        ->label('Import')
+                        ->icon('heroicon-o-arrow-up-tray')
+                        ->form([
+                            FileUpload::make('file')
+                                ->required()
+                                ->storeFiles(false)
+                                ->acceptedFileTypes(['application/json'])
+                                ->helperText('If importing a flow from another user, make sure ')
+                        ])
+                        ->action(function (array $data, ?Product $record, Set $set, Get $get) {
+                            //https://filamentphp.com/docs/3.x/forms/fields/file-upload
+                            // For debugging
+                            $tempFile = $data['file'];
+                            // Get file contents - this works with TemporaryUploadedFile
+                            $fileContent = $tempFile->get();
+                            $ProductData = json_decode($fileContent, true);
+
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                Notification::make()
+                                    ->title('Invalid JSON file')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            // Set the flow data to the form
+                            $set('', $ProductData);
+                        })
+                ])
             ]);
     }
 
