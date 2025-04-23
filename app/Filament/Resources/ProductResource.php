@@ -74,16 +74,16 @@ class ProductResource extends Resource
                 Grid::make('display')
                     ->columns(3)
                     ->schema([
-                        TextInput::make('input_data')
+                        Textarea::make('input_data')
                             ->label('Input data')
                             ->disabled(),
 
-                        TextInput::make('named_data')
-                            ->label('$get Named Data')
+                        Textarea::make('named_data')
+                            ->label('Named Data state')
                             ->disabled(),
 
-                        TextInput::make('unnamed_data')
-                            ->label('$get Unnamed Data')
+                        Textarea::make('unnamed_data')
+                            ->label('Unnamed Data state')
                             ->disabled(),
 
                     ])
