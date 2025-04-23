@@ -59,14 +59,14 @@ class ProductResource extends Resource
                             ->label('Named Repeater')
                             ->simple(
                                 TextInput::make('input')
-                                    ->disabled()
+                                    //->disabled()
                             ),
 
                         Repeater::make('unnamed_repeater')
                             ->label('Unnamed Repeater')
                             ->simple(
                                 TextInput::make('')
-                                    ->disabled()
+                                    //->disabled()
                             )
 
                         ]),
